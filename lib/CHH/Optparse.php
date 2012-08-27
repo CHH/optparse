@@ -32,7 +32,7 @@ class Exception extends \Exception
 class ParseException extends Exception
 {}
 
-class RequiredArgumentMissingException extends Exception
+class ArgumentException extends Exception
 {}
 
 class Flag
@@ -178,7 +178,7 @@ class Parser implements \ArrayAccess
         foreach ($this->flags as $flag) {
             if (!array_key_exists($flag->name, $this->parsedFlags)) {
                 if ($flag->required) {
-                    throw new RequiredArgumentMissingException(sprintf(
+                    throw new ArgumentException(sprintf(
                         'Missing required argument "%s"', $name
                     ));
                 } else {
@@ -192,8 +192,8 @@ class Parser implements \ArrayAccess
         $pos = 0;
 
         foreach ($this->args as $arg) {
-            if ($arg->required and !isset($args[$pos]) and !isset($args[$pos + $arg->count - 1])) {
-                throw new RequiredArgumentMissingException(sprintf(
+            if ($arg->required and !isset($args[$pos])) {
+                throw new ArgumentException(sprintf(
                     'Missing required argument "%s"', $arg->name
                 ));
             }

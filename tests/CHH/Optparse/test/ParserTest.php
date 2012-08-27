@@ -76,6 +76,17 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @expectedException \CHH\Optparse\ArgumentException
+     */
+    function testThrowsExceptionWhenRequiredArgumentIsMissing()
+    {
+        $parser = new Parser;
+        $parser->addArgument("foo", array("required" => true));
+
+        $parser->parse(array());
+    }
+
+    /**
      * @expectedException \CHH\Optparse\ParseException
      */
     function testExceptionOnUndefinedArgument()
