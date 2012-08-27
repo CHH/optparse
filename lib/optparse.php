@@ -26,15 +26,26 @@
 #
 namespace optparse;
 
+class Exception extends \Exception
+{}
+
+class ParseException extends Exception
+{}
+
+class RequiredArgumentMissingException extends Exception
+{}
+
 class Flag
 {
-    public $name;
-    public $callback;
-    public $aliases = array();
-    public $hasValue = false;
-    public $required = false;
-    public $defaultValue;
-    public $var;
+    public
+        $name,
+        $callback,
+        $aliases = array(),
+        $hasValue = false,
+        $required = false,
+        $defaultValue,
+        $var,
+        $help;
 
     function __construct($name, $options = array(), $callback = null)
     {
@@ -45,6 +56,7 @@ class Flag
         $this->required = (bool) @$options["required"];
         $this->defaultValue = @$options["default"];
         $this->hasValue = (bool) @$options["has_value"];
+        $this->help = @$options["help"];
 
         if (array_key_exists("var", $options)) $this->var =& $options["var"];
     }
@@ -67,10 +79,12 @@ class Flag
 
 class Argument
 {
-    public $name;
-    public $vararg = false;
-    public $required = false;
-    public $defaultValue;
+    public
+        $name,
+        $vararg = false,
+        $required = false,
+        $defaultValue,
+        $help;
 
     function __construct($name, $options = array())
     {
@@ -78,6 +92,7 @@ class Argument
         $this->vararg = (bool) @$options["var_arg"];
         $this->required = (bool) @$options["required"];
         $this->defaultValue = @$options["default"];
+        $this->help = @$options["help"];
     }
 
     function __toString()
@@ -96,23 +111,22 @@ class Argument
     }
 }
 
-class Exception extends \Exception
-{}
-
-class ParseException extends Exception
-{}
-
-class RequiredArgumentMissingException extends Exception
-{}
-
 class Parser implements \ArrayAccess
 {
     protected
+        # Description of the command. Used in the usage message.
         $description,
+
+        # Defined flags, by alias.
         $flags = array(),
+
+        # Defined arguments, by position.
         $args = array(),
 
+        # Parsed flags, by name.
         $parsedFlags = array(),
+
+        # Parsed arguments, by name or position.
         $parsedArgs = array();
 
     function __construct($description = '')
