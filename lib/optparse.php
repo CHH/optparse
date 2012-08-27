@@ -1,31 +1,36 @@
 <?php
 
+# Implements an option parser.
+#
+# Examples
+#
+#   $parser = new optparse\Parser;
+#
+#   $parser->addFlag("help", ["alias" => "-h"]);
+#   $parser->addFlag("chdir", ["alias" => "-C"]);
+#   $parser->addArgument("files", ["var_arg" => true, "required" => true]);
+#
+#   $parser->parse(array("--help", "foo", "bar", "baz"));
+#
+#   echo var_export($parser["help"]);
+#   # Output:
+#   # true
+#
+#   foreach ($parser["files"] as $file) {
+#       echo $file, "\n";
+#   }
+#   # Output:
+#   # foo
+#   # bar
+#   # baz
+#
 namespace optparse;
-
-/*
-    $parser = new optparse\Parser;
-    $parser->flag("help", ["alias" => "-h", "default" => false]);
-
-    # Map function as last argument.
-    $parser->flag("queues", ["default" => [], "has_value" => true], function($val) {
-        return explode(',', $val);
-    });
-
-    $parser->parse($_SERVER['argv']);
-
-    if ($parser["help"]) {
-        echo $parser->usage();
-        exit;
-    }
-*/
 
 class Flag
 {
     public $name;
-
     public $callback;
     public $aliases = array();
-
     public $hasValue = false;
     public $required = false;
     public $defaultValue;
@@ -60,16 +65,31 @@ class Flag
 class Argument
 {
     public $name;
-    public $count;
+    public $vararg = false;
     public $required = false;
     public $defaultValue;
 
     function __construct($name, $options = array())
     {
         $this->name = $name;
-        $this->count = @$options["count"] ?: 1;
+        $this->vararg = (bool) @$options["var_arg"];
         $this->required = (bool) @$options["required"];
-        $this->defaultValue = @$options["defaultValue"];
+        $this->defaultValue = @$options["default"];
+    }
+
+    function __toString()
+    {
+        $arg = "<{$this->name}>";
+
+        if ($this->vararg) {
+            $arg = "$arg...";
+        }
+
+        if (!$this->required) {
+            return "[$arg]";
+        }
+
+        return $arg;
     }
 }
 
@@ -94,6 +114,11 @@ class Parser implements \ArrayAccess
         $this->description = $description;
     }
 
+    # Public: Parse the array of flags.
+    #
+    # args - Array of arguments. When null `$_SERVER['argv']` is used (sans first item).
+    #
+    # Returns Nothing.
     function parse($args = null)
     {
         if ($args === null) {
@@ -148,17 +173,38 @@ class Parser implements \ArrayAccess
                 ));
             }
 
-            if ($arg->count === 1) {
-                $value = $args[$pos];
+            if (isset($args[$pos])) {
+                if ($arg->vararg) {
+                    $value = array_slice($args, $pos);
+                    $pos += count($value);
+                } else {
+                    $value = $args[$pos];
+                    $pos++;
+                }
             } else {
-                $value = array_slice($args, $pos, $arg->count);
+                $value = $arg->defaultValue;
             }
 
-            $pos += $arg->count;
             $this->parsedArgs[$arg->name] = $value;
         }
     }
 
+    # Public: Adds a flag to the parser.
+    #
+    # Flags are arguments which typically begin with either one or two dashes.
+    #
+    # name     - Name of the flag. By default the flag's argument name is "--$name".
+    # options  - Array of options (default: array()):
+    #            'alias'     - Alias(es) for the flag, for example '-h'. By default the only
+    #                          alias is the flag's name prefixed with two dashes.
+    #            'has_value' - Denotes that the argument following this flag
+    #                          is the flag's value (default: false).
+    #            'default'   - Default value, when the flag is not passed (default: null).
+    #            'required'  - Throw an exception when the flag is omitted (default: false).
+    # callback - A callback which is called when the flag is present and is passed the flag's
+    #            value. Can be used to run actions or to process the flags value (default: null).
+    #
+    # Returns the Parser.
     function addFlag($name, $options = array(), $callback = null)
     {
         $flag = new Flag($name, $options, $callback);
@@ -170,6 +216,15 @@ class Parser implements \ArrayAccess
         return $this;
     }
 
+    # Public: Adds a named argument.
+    #
+    # name    - Name of the argument. Can be used to retrieve the argument via the `arg` method.
+    # options - Array of options (default: array()):
+    #           'var_arg'  - Denotes that the argument has multiple values (default: false).
+    #           'default'  - Default value, when the argument is optional and not given (default: null).
+    #           'required' - Makes the argument required (default: false).
+    #
+    # Returns the Parser.
     function addArgument($name, $options = array())
     {
         $arg = new Argument($name, $options);
@@ -210,17 +265,7 @@ class Parser implements \ArrayAccess
     function usage()
     {
         $flags = join(' ', array_unique(array_values($this->flags)));
-
-        $args = join(' ', array_map(
-            function($arg) {
-                if (!$arg->required) {
-                    return "[<{$arg->name}>]";
-                }
-
-                return "<{$arg->name}>";
-            },
-            $this->args
-        ));
+        $args = join(' ', $this->args);
 
         return <<<EOT
 Usage: $flags $args

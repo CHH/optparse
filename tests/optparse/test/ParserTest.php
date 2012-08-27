@@ -51,8 +51,32 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals("bar", $parser["foo"]);
 
         $this->assertEquals(array("baz"), $parser->args());
-        $this->assertEquals("baz", $parser->get(0));
-        $this->assertEquals(null, $parser->get(1));
+        $this->assertEquals("baz", $parser->arg(0));
+        $this->assertEquals(null, $parser->arg(1));
+    }
+
+    function testVarArgs()
+    {
+        $parser = new Parser;
+
+        $parser->addFlag("help");
+        $parser->addArgument("foo");
+        $parser->addArgument("bar", array("var_arg" => true));
+
+        $parser->parse(array("--help", "foo", "bar", "baz"));
+
+        $this->assertEquals("foo", $parser["foo"]);
+        $this->assertEquals(array("bar", "baz"), $parser["bar"]);
+        $this->assertTrue($parser["help"]);
+    }
+
+    function testArgumentDefaultValue()
+    {
+        $parser = new Parser;
+        $parser->addArgument("foo", array("default" => "abc"));
+        $parser->parse(array());
+
+        $this->assertEquals("abc", $parser->arg("foo"));
     }
 
     /**
@@ -70,13 +94,13 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $parser = new Parser;
 
         $parser->addFlag("help");
-        $parser->addArgument("foo", array("count" => 2));
+        $parser->addArgument("foo");
         $parser->addArgument("bar");
 
         $parser->parse(array("--help", "foo", "bar", "baz"));
 
-        $this->assertEquals(array("foo", "bar"), $parser->get("foo"));
-        $this->assertEquals("baz", $parser->get("bar"));
+        $this->assertEquals("foo", $parser->get("foo"));
+        $this->assertEquals("bar", $parser->get("bar"));
     }
 
     function testUsage()
@@ -88,10 +112,11 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 
         $parser->addArgument("baz", array("required" => true));
         $parser->addArgument("boo", array("required" => false));
+        $parser->addArgument("bab", array("var_arg" => true));
 
         $this->assertEquals(
             <<<EOT
-Usage: [--foo|-f] [--bar <bar>] <baz> [<boo>]
+Usage: [--foo|-f] [--bar <bar>] <baz> [<boo>] [<bab>...]
 
 Hello World
 EOT
