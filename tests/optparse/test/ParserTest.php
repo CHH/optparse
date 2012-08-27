@@ -9,9 +9,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     function testFlags()
     {
         $parser = new Parser;
-
         $parser->addFlag("help", array("alias" => "-h", "default" => false));
-
         $parser->parse(array("-h"));
 
         $this->assertTrue($parser["help"]);
@@ -21,7 +19,6 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     function testFlagsAfterArgumentsParseCorrectly()
     {
         $parser = new Parser;
-
         $parser->addFlag("help");
         $parser->parse(array("foo", "bar", "--help"));
 
@@ -45,7 +42,6 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     {
         $parser = new Parser;
         $parser->addFlag("foo", array("has_value" => true));
-
         $parser->parse(array("--foo", "bar", "baz"));
 
         $this->assertEquals("bar", $parser["foo"]);
@@ -101,6 +97,24 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals("foo", $parser->get("foo"));
         $this->assertEquals("bar", $parser->get("bar"));
+    }
+
+    function testFlagVarByReference()
+    {
+        $foo = null;
+        $bar = null;
+        $baz = null;
+
+        $parser = new Parser;
+        $parser->addFlag('foo', array('var' => &$foo));
+        $parser->addFlagVar("bar", $bar);
+        $parser->addFlagVar("baz", $baz, array("default" => "foo"));
+
+        $parser->parse(array("--foo", "--bar"));
+
+        $this->assertTrue($foo);
+        $this->assertTrue($bar);
+        $this->assertEquals("foo", $baz);
     }
 
     function testUsage()

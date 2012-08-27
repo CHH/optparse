@@ -34,6 +34,7 @@ class Flag
     public $hasValue = false;
     public $required = false;
     public $defaultValue;
+    public $var;
 
     function __construct($name, $options = array(), $callback = null)
     {
@@ -44,6 +45,8 @@ class Flag
         $this->required = (bool) @$options["required"];
         $this->defaultValue = @$options["default"];
         $this->hasValue = (bool) @$options["has_value"];
+
+        if (array_key_exists("var", $options)) $this->var =& $options["var"];
     }
 
     function __toString()
@@ -149,7 +152,8 @@ class Parser implements \ArrayAccess
                     $value = call_user_func($flag->callback, $value);
                 }
 
-                $this->parsedFlags[$flag->name] = $value;
+                # Set the reference given as the flag's 'var'.
+                $flag->var = $this->parsedFlags[$flag->name] = $value;
             }
         }
 
@@ -160,7 +164,7 @@ class Parser implements \ArrayAccess
                         'Missing required argument "%s"', $name
                     ));
                 } else {
-                    $this->parsedFlags[$flag->name] = $flag->defaultValue;
+                    $flag->var = $this->parsedFlags[$flag->name] = $flag->defaultValue;
                 }
             }
         }
@@ -204,6 +208,7 @@ class Parser implements \ArrayAccess
     #                          is the flag's value (default: false).
     #            'default'   - Default value, when the flag is not passed (default: null).
     #            'required'  - Throw an exception when the flag is omitted (default: false).
+    #            'var'       - Reference to a variable which should be set to the flag's value.
     # callback - A callback which is called when the flag is present and is passed the flag's
     #            value. Can be used to run actions or to process the flags value (default: null).
     #
@@ -217,6 +222,21 @@ class Parser implements \ArrayAccess
         }
 
         return $this;
+    }
+
+    # Public: Assigns the variable to the value of the flag.
+    #
+    # The values is available after Parser::parse() was called.
+    #
+    # name    - Name of the flag.
+    # var     - Variable which should be set to the flag's value.
+    # options - See `addFlag` (default: array()).
+    #
+    # Returns the Parser.
+    function addFlagVar($name, &$var, $options = array())
+    {
+        $options["var"] =& $var;
+        return $this->addFlag($name, $options);
     }
 
     # Public: Adds a named argument.
