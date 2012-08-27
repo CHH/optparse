@@ -193,7 +193,7 @@ class Parser implements \ArrayAccess
 
         foreach ($this->args as $arg) {
             if ($arg->required and !isset($args[$pos]) and !isset($args[$pos + $arg->count - 1])) {
-                throw new ParseException(sprintf(
+                throw new RequiredArgumentMissingException(sprintf(
                     'Missing required argument "%s"', $arg->name
                 ));
             }
