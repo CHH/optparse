@@ -244,7 +244,7 @@ class Parser implements \ArrayAccess
 
     # Public: Assigns the variable to the value of the flag.
     #
-    # The values is available after Parser::parse() was called.
+    # The value is available after `Parser::parse()` was called.
     #
     # name    - Name of the flag.
     # var     - Variable which should be set to the flag's value.
