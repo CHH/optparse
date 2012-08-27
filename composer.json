@@ -1,0 +1,19 @@
+{
+    "name": "chh/optparse",
+    "description": "Easy to use option parser.",
+    "authors": [
+        {
+            "name": "Christoph Hochstrasser",
+            "email": "christoph.hochstrasser@gmail.com"
+        }
+    ],
+    "keywords": [
+        "cli"
+    ],
+    "require": {
+        "php": ">=5.3.3"
+    },
+    "autoload": {
+        "classmap": ["lib/"]
+    }
+}
