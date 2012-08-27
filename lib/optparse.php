@@ -93,10 +93,13 @@ class Argument
     }
 }
 
-class ParseException extends \Exception
+class Exception extends \Exception
 {}
 
-class RequiredArgumentMissingException extends \Exception
+class ParseException extends Exception
+{}
+
+class RequiredArgumentMissingException extends Exception
 {}
 
 class Parser implements \ArrayAccess
