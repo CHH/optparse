@@ -1,8 +1,8 @@
 <?php
 
-namespace optparse\test;
+namespace CHH\Optparse\Test;
 
-use optparse\Parser;
+use CHH\Optparse\Parser;
 
 class ParserTest extends \PHPUnit_Framework_TestCase
 {
@@ -76,7 +76,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \optparse\ParseException
+     * @expectedException \CHH\Optparse\ParseException
      */
     function testExceptionOnUndefinedArgument()
     {

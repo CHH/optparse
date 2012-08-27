@@ -24,7 +24,7 @@
 #   # bar
 #   # baz
 #
-namespace optparse;
+namespace CHH\Optparse;
 
 class Exception extends \Exception
 {}
@@ -117,6 +117,9 @@ class Parser implements \ArrayAccess
         # Description of the command. Used in the usage message.
         $description,
 
+        # Array of example usages, printed in the usage message.
+        $examples = array(),
+
         # Defined flags, by alias.
         $flags = array(),
 
@@ -129,9 +132,10 @@ class Parser implements \ArrayAccess
         # Parsed arguments, by name or position.
         $parsedArgs = array();
 
-    function __construct($description = '')
+    function __construct($description = '', $examples = array())
     {
         $this->description = $description;
+        $this->examples = $examples;
     }
 
     # Public: Parse the array of flags.
@@ -270,16 +274,29 @@ class Parser implements \ArrayAccess
         return $this;
     }
 
+    # Retrieves all parsed arguments.
+    #
+    # Returns an Array.
     function args()
     {
         return $this->parsedArgs;
     }
 
+    # Get a flag or named argument.
+    #
+    # name - Flag or argument name.
+    #
+    # Returns the value of the flag or argument.
     function get($name)
     {
         return $this->flag($name) ?: $this->arg($name);
     }
 
+    # Returns the argument by position or name.
+    #
+    # pos - Position or name.
+    #
+    # Returns the argument's value or Null when not set.
     function arg($pos)
     {
         if (array_key_exists($pos, $this->parsedArgs)) {
@@ -287,6 +304,11 @@ class Parser implements \ArrayAccess
         }
     }
 
+    # Returns the flag's value by name.
+    #
+    # name - Name of the flag.
+    #
+    # Returns the flag's value or Null when not set.
     function flag($name)
     {
         if (array_key_exists($name, $this->parsedFlags)) {
@@ -294,31 +316,55 @@ class Parser implements \ArrayAccess
         }
     }
 
+    # Slices the parsed arguments.
+    #
+    # start  - Index where slicing should start.
+    # length - Optional length of the returned array (default: null).
+    #
+    # Returns an Array.
     function slice($start, $length = null)
     {
         return array_slice($this->parsedArgs, $start, $length);
     }
 
+    # Generates a usage message from the defined flags and arguments.
+    #
+    # Returns a String.
     function usage()
     {
         $flags = join(' ', array_unique(array_values($this->flags)));
         $args = join(' ', $this->args);
 
-        return <<<EOT
-Usage: $flags $args
+        $usage = "Usage: $flags $args";
 
-{$this->description}
-EOT;
+        if ($this->examples) {
+            $usage .= "\n\nExamples\n\n" . join("\n", $this->examples);
+        }
+
+        if ($this->description) {
+            $usage .= "\n\n{$this->description}";
+        }
+
+        return $usage;
     }
 
+    # Allows retrieving of flag and argument values by using the
+    # parser as array.
+    #
+    # offset - Name of flag or argument.
+    #
+    # Returns the value of the flag/argument or Null when not set.
     function offsetGet($offset)
     {
         return $this->get($offset);
     }
 
+    # Checks if the given flag or argument is set.
+    #
+    # Returns True when the flag/argument is set, False otherwise.
     function offsetExists($offset)
     {
-        return isset($this->parsedFlags[$offset]);
+        return null !== $this->get($offset);
     }
 
     function offsetSet($offset, $value) {}
