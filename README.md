@@ -56,7 +56,7 @@ echo "$msg\n";
 
 Try it:
 
-    % php hello.php Christoph -S
+    % php hello.php Christoph --shout
     HELLO CHRISTOPH!
 
 ## Use
