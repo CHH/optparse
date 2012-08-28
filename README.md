@@ -76,7 +76,7 @@ or by using the `addFlagVar` method and passing it the variable:
 $foo = null;
 $bar = null;
 
-$parser->addFlag("foo", ["var" => &$foo", "has_value" => true]);
+$parser->addFlag("foo", ["var" => &$foo, "has_value" => true]);
 $parser->addFlagVar("bar", $bar, ["has_value" => true]);
 
 $parser->parse(['--foo', 'foo', '--bar', 'bar']);
