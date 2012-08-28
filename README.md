@@ -93,7 +93,7 @@ $parser->addFlag("queues", ["has_value" => true], function(&$value) {
 ```
 
 The call to `parse` takes an array of arguments, or falls back to using
-the arguments from `$\_SERVER['argv']`. The `parse` method throws an
+the arguments from `$_SERVER['argv']`. The `parse` method throws an
 `CHH\Optparse\ArgumentException` when a required flag or argument is missing, so make
 sure to catch this Exception and provide the user with a nice error
 message.
