@@ -1,17 +1,19 @@
-# Optparse — an easy to use Parser for Command Line Arguments
+# Optparse — Another Command Line Argument Parser
 
 ## Install
 
-1. Get [composer](http://getcomposer.org).
-2. Put this into your local `composer.json`:
-   ```
-   {
-     "require": {
-       "chh/optparse": "*@dev"
-     }
-   }
-   ```
-3. `php composer.phar install`
+1\. Get [composer](http://getcomposer.org).
+
+2\. Put this into your local `composer.json`:
+```
+{
+  "require": {
+    "chh/optparse": "*@dev"
+  }
+}
+```
+
+3\. `php composer.phar install`
 
 ## Use
 
