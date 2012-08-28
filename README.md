@@ -17,6 +17,8 @@
 
 ## Example
 
+`hello.php`:
+
 ```php
 <?php
 
@@ -51,6 +53,11 @@ if ($parser["shout"]) {
 
 echo "$msg\n";
 ```
+
+Try it:
+
+    % php hello.php Christoph -S
+    HELLO CHRISTOPH!
 
 ## Use
 
