@@ -55,6 +55,18 @@ $parser->addFlag("help", ["alias" => "-h"]);
 
 This way the `help` flag is available as `--help` _and_ `-h`.
 
+Flags don't expect values following them by default. To turn this on set the flag's `has_value` option
+to `true`:
+
+```php
+<?php
+
+$parser->addFlag("name", ["has_value" => true]);
+$parser->parse(['--name', 'John']);
+
+echo "Hello World {$parser["name"]}!\n";
+```
+
 The parser also supports callbacks for flags. These are passed to
 `addFlag` as last argument. The callback is called everytime the parser
 encounters the flag. It gets passed a reference to the flag's value (`true` if it
