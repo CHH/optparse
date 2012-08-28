@@ -129,6 +129,8 @@ class Parser implements \ArrayAccess
         # Parsed flags, by name.
         $parsedFlags = array(),
 
+        $parsedNamedArgs = array(),
+
         # Parsed arguments, by name or position.
         $parsedArgs = array();
 
@@ -151,17 +153,22 @@ class Parser implements \ArrayAccess
 
         foreach ($args as $pos => $arg) {
             if (substr($arg, 0, 1) === '-') {
+                if (preg_match('/^(.+)=(.+)$/', $arg, $matches)) {
+                    $arg = $matches[1];
+                    $value = $matches[2];
+                }
+
                 if (!$flag = @$this->flags[$arg]) {
-                    throw new ParseException(sprintf(
-                        'Flag "%s" is not defined.', $arg
-                    ));
+                    throw new ParseException(sprintf('Flag "%s" is not defined.', $arg));
                 }
 
                 unset($args[$pos]);
 
                 if ($flag->hasValue) {
-                    $value = $args[$pos + 1];
-                    unset($args[$pos + 1]);
+                    if (!isset($value)) {
+                        $value = $args[$pos + 1];
+                        unset($args[$pos + 1]);
+                    }
                 } else {
                     $value = true;
                 }
@@ -210,7 +217,7 @@ class Parser implements \ArrayAccess
                 $value = $arg->defaultValue;
             }
 
-            $this->parsedArgs[$arg->name] = $value;
+            $this->parsedNamedArgs[$arg->name] = $value;
         }
     }
 
@@ -299,6 +306,10 @@ class Parser implements \ArrayAccess
     # Returns the argument's value or Null when not set.
     function arg($pos)
     {
+        if (array_key_exists($pos, $this->parsedNamedArgs)) {
+            return $this->parsedNamedArgs[$pos];
+        }
+
         if (array_key_exists($pos, $this->parsedArgs)) {
             return $this->parsedArgs[$pos];
         }

@@ -10,10 +10,20 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     {
         $parser = new Parser;
         $parser->addFlag("help", array("alias" => "-h", "default" => false));
+
         $parser->parse(array("-h"));
 
         $this->assertTrue($parser["help"]);
         $this->assertEmpty($parser->args());
+    }
+
+    function testSupportsPassingFlagValueWithEqualSign()
+    {
+        $parser = new Parser;
+        $parser->addFlag("name", array("has_value" => true));
+        $parser->parse(array("--name=foo"));
+
+        $this->assertEquals("foo", $parser["name"]);
     }
 
     function testFlagsAfterArgumentsParseCorrectly()
@@ -29,7 +39,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     function testCallbacks()
     {
         $parser = new Parser;
-        $parser->addFlag("list", array("has_value" => true, "default" => array()), function(&$val) {
+        $parser->addFlag("list", array("has_value" => true), function(&$val) {
             $val = explode(',', $val);
         });
 
@@ -42,6 +52,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     {
         $parser = new Parser;
         $parser->addFlag("foo", array("has_value" => true));
+        $parser->addArgument("bar");
         $parser->parse(array("--foo", "bar", "baz"));
 
         $this->assertEquals("bar", $parser["foo"]);
