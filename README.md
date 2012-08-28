@@ -67,6 +67,27 @@ $parser->parse(['--name', 'John']);
 echo "Hello World {$parser["name"]}!\n";
 ```
 
+You can also bind the flag directly to a reference, by passing the reference in the `var` option
+or by using the `addFlagVar` method and passing it the variable:
+
+```php
+<?php
+
+$foo = null;
+$bar = null;
+
+$parser->addFlag("foo", ["var" => &$foo", "has_value" => true]);
+$parser->addFlagVar("bar", $bar, ["has_value" => true]);
+
+$parser->parse(['--foo', 'foo', '--bar', 'bar']);
+
+echo "$foo\n";
+echo "$bar\n";
+// Output:
+// foo
+// bar
+```
+
 The parser also supports callbacks for flags. These are passed to
 `addFlag` as last argument. The callback is called everytime the parser
 encounters the flag. It gets passed a reference to the flag's value (`true` if it
