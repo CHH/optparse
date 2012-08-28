@@ -179,7 +179,30 @@ foreach ($parser["files"] as $file) {
 // baz
 ```
 
-Arguments can also be retrieved by the `args`, `arg` and `slice` methods.
+Arguments can also be retrieved by using the `args`, `arg` and `slice` methods:
+
+```php
+<?php
+
+$parser->addArgument("foo");
+$parser->parse(["foo", "bar", "baz"]);
+
+echo var_export($parser->args());
+// Output:
+// array("foo", "bar", "baz")
+
+// Can also be used to fetch named arguments:
+echo var_export($parser->arg(0));
+echo var_export($parser->arg("foo"));
+// Output:
+// "foo"
+// "foo"
+
+// Pass start and length:
+echo var_export($parser->slice(0, 2));
+// Output:
+// array("foo", "bar");
+```
 
 ## License
 
