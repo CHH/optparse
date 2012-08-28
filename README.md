@@ -77,6 +77,8 @@ $parser->addFlag("pid_file", ["default" => "/var/tmp/foo.pid", "has_value" => tr
 $parser->parse([]);
 
 echo "{$parser["pid_file"]}\n";
+// Output:
+// /var/tmp/foo.pid
 ```
 
 You can also bind the flag directly to a reference, by passing the reference in the `var` option
