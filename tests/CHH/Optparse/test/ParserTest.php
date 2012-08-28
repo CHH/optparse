@@ -29,8 +29,8 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     function testCallbacks()
     {
         $parser = new Parser;
-        $parser->addFlag("list", array("has_value" => true, "default" => array()), function($val) {
-            return explode(',', $val);
+        $parser->addFlag("list", array("has_value" => true, "default" => array()), function(&$val) {
+            $val = explode(',', $val);
         });
 
         $parser->parse(array("--list", "foo,bar,baz"));

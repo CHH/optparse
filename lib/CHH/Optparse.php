@@ -167,7 +167,7 @@ class Parser implements \ArrayAccess
                 }
 
                 if (null !== $flag->callback) {
-                    $value = call_user_func($flag->callback, $value);
+                    call_user_func_array($flag->callback, array(&$value));
                 }
 
                 # Set the reference given as the flag's 'var'.
