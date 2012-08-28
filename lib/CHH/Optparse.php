@@ -100,7 +100,7 @@ class Argument
         $arg = "<{$this->name}>";
 
         if ($this->vararg) {
-            $arg = "$arg...";
+            $arg = "$arg ...";
         }
 
         if (!$this->required) {
@@ -287,6 +287,11 @@ class Parser implements \ArrayAccess
     function args()
     {
         return $this->parsedArgs;
+    }
+
+    function count()
+    {
+        return count($this->args());
     }
 
     # Get a flag or named argument.
