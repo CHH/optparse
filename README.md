@@ -67,6 +67,14 @@ $parser->parse(['--name', 'John']);
 echo "Hello World {$parser["name"]}!\n";
 ```
 
+You can assign a default value to a flag, by setting the `default` option:
+
+```php
+<?php
+
+$parser->addFlag("pid_file", ["default" => "/var/tmp/foo.pid", "has_value" => true]);
+```
+
 You can also bind the flag directly to a reference, by passing the reference in the `var` option
 or by using the `addFlagVar` method and passing it the variable:
 
