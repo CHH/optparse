@@ -94,8 +94,8 @@ Named arguments can be added by using the `addArgument` method, which
 takes the argument's name as first argument and then an array of
 options.
 
-As opposed to flags, the order in which arguments are defined
-**matters**.
+As opposed to flags, the order **matters** in which you define your
+arguments.
 
 Variable length arguments can be defined by setting the `var_arg` option
 to `true` in the options array. Variable arguments can only be at the
