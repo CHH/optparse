@@ -42,7 +42,6 @@ class Flag
         $callback,
         $aliases = array(),
         $hasValue = false,
-        $required = false,
         $defaultValue,
         $var,
         $help;
@@ -53,7 +52,6 @@ class Flag
         $this->callback = $callback;
 
         $this->aliases = array_merge(array("--$name"), (array) @$options["alias"]);
-        $this->required = (bool) @$options["required"];
         $this->defaultValue = @$options["default"];
         $this->hasValue = (bool) @$options["has_value"];
         $this->help = @$options["help"];
@@ -69,11 +67,7 @@ class Flag
             $s = "$s <{$this->name}>";
         }
 
-        if (!$this->required) {
-            $s = "[$s]";
-        }
-
-        return $s;
+        return "[$s]";
     }
 }
 
@@ -182,15 +176,10 @@ class Parser implements \ArrayAccess
             }
         }
 
+        # TODO: Refactor this so this fits into the above foreach
         foreach ($this->flags as $flag) {
             if (!array_key_exists($flag->name, $this->parsedFlags)) {
-                if ($flag->required) {
-                    throw new ArgumentException(sprintf(
-                        'Missing required argument "%s"', $name
-                    ));
-                } else {
-                    $flag->var = $this->parsedFlags[$flag->name] = $flag->defaultValue;
-                }
+                $flag->var = $this->parsedFlags[$flag->name] = $flag->defaultValue;
             }
         }
 
