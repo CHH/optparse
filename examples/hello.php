@@ -21,6 +21,7 @@ $parser->addArgument("name", array("required" => true));
 try {
     $parser->parse();
 } catch (Optparse\Exception $e) {
+    fwrite(STDERR, "{$e->getMessage()}\n\n");
     usage_and_exit();
 }
 

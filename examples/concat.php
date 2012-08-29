@@ -16,6 +16,7 @@ $opts->addArgument("files", array("var_arg" => true, "required" => true));
 try {
     $opts->parse();
 } catch (Optparse\Exception $e) {
+    fwrite(STDERR, "{$e->getMessage()}\n\n");
     fwrite(STDERR, "{$opts->usage()}\n");
     exit(1);
 }
