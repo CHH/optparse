@@ -181,6 +181,9 @@ class Parser implements \ArrayAccess
         }
 
         foreach ($args as $pos => $arg) {
+            // reset value
+            $value = null;
+
             if (substr($arg, 0, 1) === '-') {
                 if (preg_match('/^(.+)=(.+)$/', $arg, $matches)) {
                     $arg = $matches[1];
