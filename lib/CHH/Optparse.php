@@ -108,6 +108,9 @@ class Argument
 class Parser implements \ArrayAccess
 {
     protected
+        # The command's name, printed at the front of the usage line.
+        $name,
+
         # Description of the command. Used in the usage message.
         $description,
 
@@ -128,10 +131,42 @@ class Parser implements \ArrayAccess
         # Parsed arguments, by name or position.
         $parsedArgs = array();
 
-    function __construct($description = '', $examples = array())
+    static function build($callback)
+    {
+        $parser = new static;
+
+        if ($callback instanceof \Closure and is_callable(array($callback, "bindTo"))) {
+            $callback = $callback->bindTo($parser);
+        }
+
+        call_user_func($callback, $parser);
+
+        return $parser;
+    }
+
+    function __construct($description = '', $name = null, $examples = array())
     {
         $this->description = $description;
+        $this->name = $name;
         $this->examples = $examples;
+    }
+
+    function setName($name)
+    {
+        $this->name = $name;
+        return $this;
+    }
+
+    function setDescription($description)
+    {
+        $this->description = $description;
+        return $this;
+    }
+
+    function setExamples($examples)
+    {
+        $this->examples = $examples;
+        return $this;
     }
 
     # Public: Parse the array of flags.
@@ -339,8 +374,9 @@ class Parser implements \ArrayAccess
     {
         $flags = join(' ', array_unique(array_values($this->flags)));
         $args = join(' ', $this->args);
+        $script = $this->name ?: 'php ' . basename($_SERVER["SCRIPT_NAME"]);
 
-        $usage = "Usage: $flags $args";
+        $usage = "Usage: $script $flags $args";
 
         if ($this->examples) {
             $usage .= "\n\nExamples\n\n" . join("\n", $this->examples);
@@ -351,6 +387,63 @@ class Parser implements \ArrayAccess
         }
 
         return $usage;
+    }
+
+    function longUsage()
+    {
+        $long = '';
+        $short = $this->usage();
+
+        $flags = join("\n", array_map(
+            function($flag) {
+                $aliases = $flag->aliases;
+
+                # Sort aliases by length, so short names are first.
+                array_multisort(array_map('strlen', $flag->aliases), $aliases);
+
+                $desc = "  " . join(', ', $aliases);
+
+                if ($flag->hasValue) {
+                    $desc .= " <{$flag->name}>";
+                }
+
+                if ($flag->defaultValue !== null) {
+                    $desc .= sprintf(' (default: %s)', var_export($flag->defaultValue, true));
+                }
+
+                if ($flag->help) {
+                    $desc .= ": {$flag->help}";
+                }
+
+                return $desc;
+            },
+            array_unique($this->flags)
+        ));
+
+        $args = join("\n", array_map(
+            function($arg) {
+                $desc = "  {$arg->name}" . ($arg->required ? " (required)" : '');
+
+                if ($arg->help) {
+                    $desc .= ": {$arg->help}";
+                }
+
+                return $desc;
+            },
+            $this->args
+        ));
+
+        $long .= $short;
+
+        if ($this->args) {
+            $long .= "\n\nArguments:\n\n$args";
+        }
+
+        if ($this->flags) {
+            $long .= "\n\nFlags:\n\n$flags";
+        }
+
+        return $long;
     }
 
     # Allows retrieving of flag and argument values by using the

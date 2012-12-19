@@ -123,40 +123,88 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 
     function testFlagVarByReference()
     {
-        $foo = null;
         $bar = null;
         $baz = null;
+
+        $obj = new \StdClass;
+        $obj->foo = "";
 
         $parser = new Parser;
         $parser->addFlag('foo', array('var' => &$foo));
         $parser->addFlagVar("bar", $bar);
         $parser->addFlagVar("baz", $baz, array("default" => "foo"));
+        $parser->addFlagVar("bab", $obj->foo);
 
-        $parser->parse(array("--foo", "--bar"));
+        $parser->parse(array("--foo", "--bar", "--bab"));
 
         $this->assertTrue($foo);
         $this->assertTrue($bar);
+        $this->assertTrue($obj->foo);
         $this->assertEquals("foo", $baz);
+    }
+
+    function testBuild()
+    {
+        $opts = Parser::build(function($parser) {
+            $parser->addFlag("help");
+        });
+
+        $opts->parse(array("--help"));
+
+        $this->assertTrue($opts["help"]);
+    }
+
+    function testBuildClosureBinding()
+    {
+        if (version_compare(PHP_VERSION, "5.4.0") < 0) {
+            $this->markTestSkipped("Closure binding is only supported on PHP >= 5.4.0");
+        }
+
+        $opts = Parser::build(function() {
+            $this->addFlag("help");
+        });
+
+        $opts->parse(array("--help"));
+
+        $this->assertTrue($opts["help"]);
     }
 
     function testUsage()
     {
-        $parser = new Parser("Hello World");
+        $parser = new Parser("Hello World", "hello");
 
-        $parser->addFlag("foo", array("alias" => "-f"));
+        $parser->addFlag("foo", array("alias" => "-f", "help" => "Turn on fooness"));
         $parser->addFlag("bar", array("has_value" => true));
 
         $parser->addArgument("baz", array("required" => true));
         $parser->addArgument("boo", array("required" => false));
-        $parser->addArgument("bab", array("var_arg" => true));
+        $parser->addArgument("bab", array("var_arg" => true, "help" => "Bla bla bla"));
 
         $this->assertEquals(
             <<<EOT
-Usage: [--foo|-f] [--bar <bar>] <baz> [<boo>] [<bab>...]
+Usage: hello [--foo|-f] [--bar <bar>] <baz> [<boo>] [<bab> ...]
 
 Hello World
 EOT
             , $parser->usage()
+        );
+
+        $this->assertEquals(
+<<<EOT
+{$parser->usage()}
+
+Arguments:
+
+  baz (required)
+  boo
+  bab: Bla bla bla
+
+Flags:
+
+  -f, --foo: Turn on fooness
+  --bar <bar>
+EOT
+            , $parser->longUsage()
         );
     }
 }
